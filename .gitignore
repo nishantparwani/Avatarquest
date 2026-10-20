@@ -1,5 +1,3 @@
 __pycache__/
-outputs/
-assets/*.glb
 aibody/cape_data/
 aibody/models/

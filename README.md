@@ -14,9 +14,11 @@ All of it on a regular CPU.**
 ![Arduino](https://img.shields.io/badge/Arduino-sensor%20control-00979D?logo=arduino&logoColor=white)
 ![CPU only](https://img.shields.io/badge/GPU-not%20needed-brightgreen)
 
-<img src="docs/screenshots/01_gameplay.png" alt="RetroAvatarQuest gameplay" width="860">
+<img src="docs/screenshots/00_pipeline.png" alt="From a 3D scan to a game sprite" width="900">
 
-<sub>The default hero. Run the pipeline on your own `.glb` and it becomes you.</sub>
+<sub>Real output: my own phone 3D scan → body parts → skeleton → the hero of the game.</sub>
+
+<img src="docs/screenshots/01_gameplay.png" alt="Playing as myself" width="860">
 
 </div>
 
@@ -46,6 +48,10 @@ your 3D model (.glb)                CAPE scans (real people)
 
 No CAPE data? The pipeline falls back to the geometric heuristics. No avatar generated? The game uses a built-in hero.
 
+**Try it with the files in this repo:** `assets/input_model.glb` is the scan above and `outputs/` holds what the pipeline
+made from it (`avatar.png`, `joints.json`, `segmentation.npz`, `clean_mesh.glb`), so `cd game && python main.py` starts
+you straight away as the scanned hero.
+
 ## Control it with your hand
 
 Plug an Arduino with a proximity sensor into USB and the game reads `PROX:<value>` lines over serial:
@@ -70,12 +76,12 @@ No board connected? The game notices and runs on the keyboard alone.
 ```bash
 pip install -r requirements.txt
 
-# Play right away (built-in hero)
+# Play right away (as the scanned hero in outputs/)
 cd game
 python main.py
 
-# Make yourself the hero
-#   1. put your model at assets/input_model.glb
+# Make YOURSELF the hero
+#   1. scan yourself with any phone 3D-scan app, export .glb, save it as assets/input_model.glb
 #   2. (optional) extract CAPE sample 00096 into aibody/cape_data/00096/  (~6–8 GB, not included)
 cd aibody
 python train_body_model.py        # → outputs/avatar.png, outputs/joints.json
@@ -98,7 +104,8 @@ game/
   player.py            hero sprite and movement
   physics.py           gravity, jumping, collisions
   arduino_bridge.py    optional sensor input over serial
-assets/                put input_model.glb here
+assets/input_model.glb the sample 3D scan (replace it with yours)
+outputs/               what the pipeline made from it: avatar.png, joints.json, segmentation.npz, clean_mesh.glb
 ```
 
 ## Limits and next steps

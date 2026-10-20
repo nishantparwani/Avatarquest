@@ -18,7 +18,7 @@ import os
 
 # ── Path placeholder ─────────────────────────────────────────────────────────
 # Change this to your actual GLB file path
-DEFAULT_GLB_PATH = r"C:/Users/YourName/project/input_model.glb"
+DEFAULT_GLB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "assets", "input_model.glb")
 
 
 def load_glb(glb_path: str) -> trimesh.Trimesh:

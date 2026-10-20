@@ -25,8 +25,8 @@ import json
 import os
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
-SEG_NPZ_PATH   = r"C:/Users/YourName/project/outputs/segmentation.npz"
-JOINTS_OUT     = r"C:/Users/YourName/project/outputs/joints.json"
+SEG_NPZ_PATH   = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "outputs", "segmentation.npz")
+JOINTS_OUT     = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "outputs", "joints.json")
 
 # Body-part label IDs (must match mesh_segment.py)
 HEAD      = 0

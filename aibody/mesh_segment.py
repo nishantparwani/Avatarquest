@@ -26,9 +26,11 @@ import torch.nn as nn
 from PIL import Image, ImageDraw
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
-CAPE_DATA_DIR  = r"C:/Users/YourName/project/ai_body/cape_data/00096"
-MODEL_SAVE_PATH = r"C:/Users/YourName/project/ai_body/models/body_classifier.pt"
-OUTPUT_DIR      = r"C:/Users/YourName/project/outputs"
+# Relative to the repository, so the project runs from wherever it is cloned.
+REPO_DIR        = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+CAPE_DATA_DIR   = os.path.join(REPO_DIR, "aibody", "cape_data", "00096")
+MODEL_SAVE_PATH = os.path.join(REPO_DIR, "aibody", "models", "body_classifier.pt")
+OUTPUT_DIR      = os.path.join(REPO_DIR, "outputs")
 
 # Body-part labels and colours for visualisation
 LABELS = {0: "head", 1: "torso", 2: "left_arm", 3: "right_arm", 4: "legs"}
@@ -279,7 +281,7 @@ def render_avatar_sprite(vertices: np.ndarray, labels: np.ndarray,
 if __name__ == "__main__":
     from glb_parser import parse_glb
 
-    GLB_PATH = r"C:/Users/YourName/project/input_model.glb"
+    GLB_PATH = os.path.join(REPO_DIR, "assets", "input_model.glb")
 
     # 1. Parse GLB
     data = parse_glb(GLB_PATH)

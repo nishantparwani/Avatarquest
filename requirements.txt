@@ -1,0 +1,9 @@
+pygame>=2.5
+numpy
+pillow
+pyserial
+# AI body pipeline (aibody/)
+torch
+trimesh
+scipy
+pygltflib

@@ -4,9 +4,9 @@ import trimesh
 from PIL import Image, ImageDraw
 
 # ── Paths ──────────────────────────────────────────────────────────────
-BASE_DIR = r"C:/Users/nisha/Downloads/files (2) (1)"
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # repository root
 
-GLB_PATH       = os.path.join(BASE_DIR, "4_15_2026.glb")
+GLB_PATH       = os.path.join(BASE_DIR, "assets", "input_model.glb")
 OUTPUT_AVATAR  = os.path.join(BASE_DIR, "outputs", "avatar.png")
 
 SPRITE_W = 280

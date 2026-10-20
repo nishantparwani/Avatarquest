@@ -32,10 +32,11 @@ import numpy as np
 
 # ── CONFIGURE PATHS HERE ──────────────────────────────────────────────────────
 # Adjust these to match your actual file locations on Windows
-GLB_INPUT_PATH = r"C:/Users/nisha/Downloads/files (2) (1)/4_15_2026.glb"
-CAPE_DATA_DIR  = r"C:/Users/nisha/Downloads/files (2) (1)/cape_data/00096"
-MODEL_SAVE_DIR = r"C:/Users/nisha/Downloads/files (2) (1)/models"
-OUTPUT_DIR     = r"C:/Users/nisha/Downloads/files (2) (1)/outputs"
+REPO_DIR       = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+GLB_INPUT_PATH = os.path.join(REPO_DIR, "assets", "input_model.glb")
+CAPE_DATA_DIR  = os.path.join(REPO_DIR, "aibody", "cape_data", "00096")
+MODEL_SAVE_DIR = os.path.join(REPO_DIR, "aibody", "models")
+OUTPUT_DIR     = os.path.join(REPO_DIR, "outputs")
 # ─────────────────────────────────────────────────────────────────────────────
 
 MODEL_SAVE_PATH = os.path.join(MODEL_SAVE_DIR, "body_classifier.pt")

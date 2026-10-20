@@ -1,232 +1,107 @@
-# RetroAvatarQuest
+<div align="center">
 
-## Important Requirement
+# 🕹️ RetroAvatarQuest
 
-This project requires the **CAPE dataset (sample 00096)** for full functionality of the AI body pipeline.
+### Scan yourself in 3D. Play as yourself in 2D. Control it by waving your hand.
 
-Due to its size (approximately 6–8 GB), the dataset is not included in this repository.
+**A pipeline that turns any 3D humanoid model into a retro platformer hero — segmenting the body with a small
+neural network trained on real human scans — and a game you can steer with a proximity sensor on an Arduino.
+All of it on a regular CPU.**
 
-Users must download the dataset separately and place it locally before executing the pipeline.
+![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)
+![PyTorch](https://img.shields.io/badge/PyTorch-MLP-EE4C2C?logo=pytorch&logoColor=white)
+![pygame](https://img.shields.io/badge/pygame-2-6DB33F)
+![Arduino](https://img.shields.io/badge/Arduino-sensor%20control-00979D?logo=arduino&logoColor=white)
+![CPU only](https://img.shields.io/badge/GPU-not%20needed-brightgreen)
 
-If the dataset is not provided, the system will still run, but will fall back to simplified geometric heuristics instead of learned deformation.
+<img src="docs/screenshots/01_gameplay.png" alt="RetroAvatarQuest gameplay" width="860">
 
----
+<sub>The default hero. Run the pipeline on your own `.glb` and it becomes you.</sub>
 
-## Overview
-
-RetroAvatarQuest is a hybrid system integrating 3D model processing, lightweight machine learning, and a 2D game engine. The project converts a 3D humanoid model into a 2D playable character and enables control through either conventional keyboard input or real-time sensor input via an Arduino device.
-
-The system is divided into two primary components:
-
-1. An AI-based preprocessing pipeline that converts a `.glb` model into a segmented 2D avatar and joint representation.
-2. A retro-style platformer game implemented in Python using `pygame`.
-
----
-
-## Features
-
-* Parsing and processing of `.glb` 3D models
-* Automatic segmentation into anatomical regions
-* Lightweight neural network trained on CAPE dataset samples
-* Extraction of joint positions
-* 2D platformer game engine with physics and collision handling
-* Dual input system:
-
-  * Keyboard controls
-  * Arduino-based sensor input
-* Fallback rendering when generated assets are unavailable
+</div>
 
 ---
 
-## Requirements
+## How it works
 
-Install dependencies using:
+```
+your 3D model (.glb)                CAPE scans (real people)
+        │                                   │
+        ▼                                   ▼
+ glb_parser ──► mesh_segment ◄──── train a tiny MLP (CPU, minutes)
+                  head · torso · arms · legs
+                        │
+            skeleton_extract ──► joints.json
+            render_profile   ──► avatar.png  (side-on pixel sprite)
+                        │
+                        ▼
+          game/ (pygame platformer) ◄── keyboard  or  Arduino proximity sensor
+```
+
+1. **Parse** any humanoid `.glb` (a phone 3D scan, Ready Player Me, Mixamo…).
+2. **Segment** the mesh into head, torso, left arm, right arm and legs: geometric height/side heuristics first,
+   refined by a lightweight MLP trained on the [CAPE](https://cape.is.tue.mpg.de/) dataset of real human scans.
+3. **Extract** joint positions and **render** a side-profile sprite.
+4. **Play**: a 6,000-px scrolling level with platforms, physics, 30+ coins and a goal flag; your avatar is the hero.
+
+No CAPE data? The pipeline falls back to the geometric heuristics. No avatar generated? The game uses a built-in hero.
+
+## Control it with your hand
+
+Plug an Arduino with a proximity sensor into USB and the game reads `PROX:<value>` lines over serial:
+
+| Your hand is… | The hero… |
+|---|---|
+| very close | jumps |
+| at medium distance | runs left |
+| far away | runs right |
+
+No board connected? The game notices and runs on the keyboard alone.
+
+| Key | Action |
+|---|---|
+| ← / A, → / D | Move |
+| Space | Jump |
+| R | Restart after a win or a fall |
+| Esc | Quit |
+
+## Run it
 
 ```bash
-pip install pygame numpy torch trimesh pillow scipy pygltflib pyserial keyboard
-```
+pip install -r requirements.txt
 
----
-
-## Project Structure
-
-```
-RetroAvatarQuest/
-├── ai_body/
-│   ├── train_body_model.py
-│   ├── glb_parser.py
-│   ├── mesh_segment.py
-│   ├── skeleton_extract.py
-│   ├── render_profile.py
-│
-├── game/
-│   ├── main.py
-│   ├── player.py
-│   ├── physics.py
-│   ├── level.py
-│   ├── arduino_bridge.py
-│
-├── assets/
-│   └── input_model.glb
-│
-├── outputs/
-│   ├── avatar.png
-│   ├── joints.json
-│   └── clean_mesh.glb
-│
-├── README.md
-└── requirements.txt
-```
-
----
-
-## External Data Setup
-
-### 1. CAPE Dataset (Required for Full Pipeline)
-
-Download the CAPE dataset and extract sample `00096`.
-
-Place the files in:
-
-```
-ai_body/cape_data/00096/
-```
-
-Ensure the directory contains `.npz` files.
-
-Update the path in `train_body_model.py`:
-
-```python
-CAPE_DATA_DIR = "ai_body/cape_data/00096"
-```
-
----
-
-### 2. GLB Model (Required)
-
-Provide a humanoid `.glb` file.
-
-Place it in:
-
-```
-assets/input_model.glb
-```
-
-Update:
-
-```python
-GLB_INPUT_PATH = "assets/input_model.glb"
-```
-
----
-
-## Part 1: Avatar Generation
-
-Run the preprocessing pipeline:
-
-```bash
-cd ai_body
-python train_body_model.py
-```
-
-This step performs:
-
-* Parsing of the input `.glb` file
-* Neural model training (lightweight, CPU-compatible)
-* Mesh segmentation
-* Skeleton extraction
-* Output generation
-
-Generated files:
-
-```
-outputs/avatar.png
-outputs/joints.json
-outputs/clean_mesh.glb
-```
-
----
-
-## Part 2: Game Execution
-
-Run the game:
-
-```bash
+# Play right away (built-in hero)
 cd game
 python main.py
+
+# Make yourself the hero
+#   1. put your model at assets/input_model.glb
+#   2. (optional) extract CAPE sample 00096 into aibody/cape_data/00096/  (~6–8 GB, not included)
+cd aibody
+python train_body_model.py        # → outputs/avatar.png, outputs/joints.json
 ```
 
-The game loads the generated avatar automatically. If unavailable, a fallback character is used.
+Arduino on another port? Change `PORT = "COM3"` in `game/arduino_bridge.py`.
 
----
-
-## Controls
-
-### Keyboard
-
-| Key                  | Action     |
-| -------------------- | ---------- |
-| Left Arrow / A       | Move left  |
-| Right Arrow / D      | Move right |
-| Space / Up Arrow / W | Jump       |
-| R                    | Restart    |
-| Escape               | Exit       |
-
----
-
-### Sensor Input (Arduino)
-
-| Sensor Condition | Action     |
-| ---------------- | ---------- |
-| Very close       | Jump       |
-| Moderate         | Move left  |
-| Far              | Move right |
-
----
-
-## Arduino Integration
-
-Update the serial port in `arduino_bridge.py`:
-
-```python
-PORT = "COM3"
-```
-
-Ensure the Arduino outputs data in the format:
+## Project structure
 
 ```
-PROX:<value>
+aibody/
+  glb_parser.py        load the .glb mesh
+  train_body_model.py  the whole pipeline in one command
+  mesh_segment.py      body-part segmentation (heuristics + MLP)
+  skeleton_extract.py  joint positions → outputs/joints.json
+  render_profile.py    side-profile sprite → outputs/avatar.png
+game/
+  main.py              game loop, camera, HUD, win / game-over screens
+  level.py             platforms, coins, clouds, goal flag
+  player.py            hero sprite and movement
+  physics.py           gravity, jumping, collisions
+  arduino_bridge.py    optional sensor input over serial
+assets/                put input_model.glb here
 ```
 
-Example:
+## Limits and next steps
 
-```
-PROX:3
-```
-
----
-
-## Notes
-
-* All file paths should be relative.
-* The system remains functional without CAPE data, but with reduced accuracy.
-* The neural model is intentionally lightweight for CPU execution.
-
----
-
-## Limitations
-
-* Simplified physics and collision handling
-* Limited animation fidelity
-* Dependence on stable serial communication for sensor input
-
----
-
-## Future Work
-
-* Improved animation using joint data
-* Enhanced physics system
-* Expanded sensor integration
-* Performance optimization
-
----
+Simple physics and animation today. Next up: animate the sprite from `joints.json`, more sensor gestures,
+and more levels.
